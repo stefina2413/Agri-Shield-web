@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Doctor AI | AGRI-SHIELD</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .pd-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        
+        .ai-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .ai-header h1 {
+            color: var(--dark-green);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .ai-header p {
+            color: #555;
+            font-size: 1.1rem;
+        }
+
+        .upload-zone {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 2px dashed var(--primary-green);
+            border-radius: 20px;
+            padding: 50px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone:hover {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: var(--dark-green);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(46, 204, 113, 0.3);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: var(--primary-green);
+            margin-bottom: 15px;
+            transition: transform 0.3s;
+        }
+
+        .upload-zone:hover .upload-icon {
+            transform: scale(1.1);
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        /* Scanner Area */
+        .scanner-container {
+            display: none;
+            margin-top: 30px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .image-wrapper {
+            position: relative;
+            max-width: 400px;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 4px solid #fff;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .scanner-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: #38ef7d;
+            box-shadow: 0 0 15px 5px rgba(56, 239, 125, 0.6);
+            display: none;
+            z-index: 10;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; opacity: 1; }
+            50% { top: 100%; opacity: 1; }
+            100% { top: 0%; opacity: 1; }
+        }
+
+        .analyzing-text {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: var(--dark-green);
+            font-weight: 600;
+            display: none;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.6; }
+            to { opacity: 1; }
+        }
+
+        /* Results Area */
+        .results-container {
+            display: none;
+            margin-top: 30px;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            animation: slideUp 0.6s ease;
+            text-align: left;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .disease-name {
+            font-size: 2rem;
+            color: #d35400; /* Default color, change via JS depending on severity */
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .confidence-circle {
+            background: var(--dark-green);
+            color: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .confidence-circle span {
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .confidence-circle small {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .info-card {
+            background: #f9fbfb;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid var(--primary-green);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+        
+        .info-card h4 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-card p, .info-card ul {
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .info-card ul {
+            padding-left: 20px;
+            margin-top: 8px;
+        }
+
+        .info-card li {
+            margin-bottom: 5px;
+        }
+
+        .info-card.severity-high { border-left-color: #e74c3c; }
+        .info-card.severity-medium { border-left-color: #f39c12; }
+        .info-card.severity-low { border-left-color: #3498db; }
+
+        .btn-reset {
+            display: block;
+            margin: 30px auto 0;
+            padding: 12px 30px;
+            background: var(--dark-green);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-reset:hover {
+            background: #1e8449;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .result-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .confidence-circle {
+                align-self: flex-end;
+                margin-top: -60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        if (!sessionStorage.getItem('agri_auth')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+
+    <!-- Top Navigation -->
+    <nav class="main-nav">
+        <div class="nav-brand">
+            <img id="entrance-logo-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%2327ae60'><path d='M50 5C25 5 5 25 5 50s20 45 45 45 45-20 45-45S75 5 50 5zm0 15c16.5 0 30 13.5 30 30S66.5 80 50 80 20 66.5 20 50 33.5 20 50 20zm-5 15v10H35v10h10v10h10V50h10V40H55V30h-10z'/></svg>" alt="Agri-Shield Logo">
+            <h2 data-i18n="title">AGRI-SHIELD</h2>
+        </div>
+        <div class="nav-links">
+            <a href="home.html" data-i18n="nav_home">Home</a>
+            <div class="dropdown">
+                <button class="dropbtn">Modules <i class="fa-solid fa-caret-down"></i></button>
+                <div class="dropdown-content">
+                    <a href="plant_doctor.html" data-i18n="plant_doctor">Plant Doctor AI</a>
+                    <a href="nutrient_doctor.html" data-i18n="nutrient_doctor">Smart Nutrient Doctor</a>
+                    <a href="home.html#crop-health" data-i18n="health_dash" onclick="if(window.location.pathname.endsWith('home.html') || window.location.pathname === '/' || window.location.pathname === ''){ setTimeout(()=>window.scrollBy(-1000,0), 10); }">Crop Health Intelligence</a>
+                    <a href="home.html#emergency" data-i18n="emergency_action" onclick="if(window.location.pathname.endsWith('home.html') || window.location.pathname === '/' || window.location.pathname === ''){ setTimeout(()=>window.scrollBy(-1000,0), 10); }">Emergency Action</a>
+                    <a href="home.html#drone-news" data-i18n="drone_news" onclick="if(window.location.pathname.endsWith('home.html') || window.location.pathname === '/' || window.location.pathname === ''){ setTimeout(()=>window.scrollBy(-1000,0), 10); }">Drone + News</a>
+                </div>
+            </div>
+            <a href="developer.html" data-i18n="nav_developer">Developer</a>
+        </div>
+        <div class="lang-selector">
+            <select id="lang-selector">
+                <option value="en">English</option>
+                <option value="ta">தமிழ்</option>
+                <option value="hi">हिन्दी</option>
+                <option value="te">తెలుగు</option>
+                <option value="ml">മലയാളം</option>
+            </select>
+        </div>
+    </nav>
+
+    <!-- Plant Doctor Context -->
+    <div class="pd-container">
+        <div class="ai-header">
+            <h1 data-i18n="pd_title">Plant Doctor AI</h1>
+            <p data-i18n="pd_desc">Instantly diagnose plant diseases using advanced Computer Vision.</p>
+        </div>
+
+        <!-- Upload Zone -->
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+            <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+            <p class="upload-text" data-i18n="pd_upload">Click here or drag & drop a plant image</p>
+            <p style="color: #777; font-size: 0.95rem; margin-top: 10px;">Supports leaves, stems, or fruits (JPG, PNG)</p>
+            <input type="file" id="file-input" accept="image/*">
+        </div>
+
+        <!-- Scanner Container -->
+        <div class="scanner-container" id="scanner-container">
+            <div class="image-wrapper" id="image-wrapper">
+                <img id="preview-image" src="" alt="Uploaded Leaf">
+                <div class="scanner-line" id="scanner-line"></div>
+            </div>
+            <p class="analyzing-text" id="analyzing-text" data-i18n="pd_analyzing">Analyzing visual features... Please wait.</p>
+        </div>
+
+        <!-- Results Container -->
+        <div class="results-container" id="results-container">
+            <div class="result-header">
+                <div>
+                    <span class="badge" id="severity-badge" style="margin-bottom: 8px; display: inline-block; padding: 5px 10px;">Severity</span>
+                    <h2 class="disease-name" id="disease-name">Early Blight</h2>
+                    <p style="color: #666; margin-top: 8px; font-size: 1.05rem;"><i class="fa-solid fa-microscope" style="color:var(--dark-green)"></i> Pattern Classification: <strong id="pathogen-type">Fungal</strong></p>
+                </div>
+                <div class="confidence-circle">
+                    <span id="confidence-score">92%</span>
+                    <small>Match</small>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card severity-medium" id="treatment-card">
+                    <h4><i class="fa-solid fa-prescription-bottle-medical" style="color: #3498db;"></i> Treatment Recommendation</h4>
+                    <p id="treatment-text">Apply copper-based fungicide every 7 days. Ensure proper spacing for air circulation.</p>
+                </div>
+                <div class="info-card severity-low" id="action-card">
+                    <h4><i class="fa-solid fa-shield-virus" style="color: #27ae60;"></i> Preventive Actions</h4>
+                    <ul id="action-list">
+                        <li>Water at the base of the plant, avoid wetting leaves.</li>
+                        <li>Rotate crops next season.</li>
+                        <li>Remove infected lower leaves immediately.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button class="btn-reset" onclick="resetDoctor()" data-i18n="pd_reset">Scan Another Plant</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="custom-footer" style="margin-top: auto;">
+        <canvas id="footer-sparkles" style="z-index: -1;"></canvas>
+        <div class="footer-nav">
+            <a href="home.html" data-i18n="nav_home">Home</a>
+            <span>|</span>
+            <a href="developer.html" data-i18n="nav_developer">Developer</a>
+            <span>|</span>
+            <a href="#" data-i18n="nav_feedback">Feedback</a>
+        </div>
+        <div class="footer-dev-text">
+            Developed by SHANTHINI.R , STEFINA.A, TURANYA.M CREATED BY KVCET
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="sparkle.js"></script>
+    <script>
+        // Check for entrance logo
+        const savedLogo = localStorage.getItem('entrance_logo');
+        if (savedLogo) {
+            document.getElementById('entrance-logo-img').src = savedLogo;
+        }
+
+        const fileInput = document.getElementById('file-input');
+        const uploadZone = document.getElementById('upload-zone');
+        const scannerContainer = document.getElementById('scanner-container');
+        const imageWrapper = document.getElementById('image-wrapper');
+        const previewImage = document.getElementById('preview-image');
+        const scannerLine = document.getElementById('scanner-line');
+        const analyzingText = document.getElementById('analyzing-text');
+        const resultsContainer = document.getElementById('results-container');
+
+        // Drag and drop feature
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = "var(--dark-green)";
+            uploadZone.style.background = "rgba(255, 255, 255, 0.95)";
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.style.borderColor = "var(--primary-green)";
+            uploadZone.style.background = "var(--glass-bg)";
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = "var(--primary-green)";
+            uploadZone.style.background = "var(--glass-bg)";
+            
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                startAnalysis(fileInput.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                startAnalysis(e.target.files[0]);
+            }
+        });
+
+        // Add Mock AI logic for Demonstration
+        const mockDiseases = [
+            {
+                name: "Late Blight",
+                pathogen: "Fungal (Phytophthora infestans)",
+                severity: "High",
+                severityClass: "severity-high",
+                badgeColor: "#e74c3c",
+                confidence: "96%",
+                treatment: "Immediately apply chlorothalonil or copper-based fungicide. Destroy severely infected plants. Do not compost infected leaves.",
+                actions: ["Ensure excellent ventilation and spacing", "Avoid overhead watering", "Use resistant seed varieties"]
+            },
+            {
+                name: "Powdery Mildew",
+                pathogen: "Fungal",
+                severity: "Medium",
+                severityClass: "severity-medium",
+                badgeColor: "#f39c12",
+                confidence: "88%",
+                treatment: "Apply sulfur or potassium bicarbonate spray. Neem oil is also highly effective at early stages.",
+                actions: ["Prune plants to improve air circulation", "Water the soil directly, not the leaves", "Apply thick mulch"]
+            },
+            {
+                name: "Bacterial Spot",
+                pathogen: "Bacterial (Xanthomonas)",
+                severity: "High",
+                severityClass: "severity-high",
+                badgeColor: "#e74c3c",
+                confidence: "91%",
+                treatment: "Spray with appropriate copper fungicide. Unfortunately, already infected plants cannot be completely cured.",
+                actions: ["Remove all symptomatic leaves", "Avoid working in fields when wet", "Disinfect tools regularly"]
+            },
+            {
+                name: "Spider Mites",
+                pathogen: "Pest Infestation",
+                severity: "Medium",
+                severityClass: "severity-medium",
+                badgeColor: "#f39c12",
+                confidence: "84%",
+                treatment: "Use insecticidal soap or horticultural oil. Introduce predatory mites (Phytoseiulus persimilis) for organic control.",
+                actions: ["Keep plants properly watered", "Mist leaves to increase humidity", "Isolate heavily infested plants"]
+            },
+            {
+                name: "Healthy Plant",
+                pathogen: "None detected",
+                severity: "Low",
+                severityClass: "severity-low",
+                badgeColor: "#27ae60",
+                confidence: "99%",
+                treatment: "No treatment required. The crop appears to be in excellent health with no signs of disease or pests.",
+                actions: ["Continue regular watering schedule", "Maintain balanced soil nutrition", "Monitor health weekly"]
+            }
+        ];
+
+        function startAnalysis(file) {
+            // Hide upload zone, show scanner
+            uploadZone.style.display = 'none';
+            scannerContainer.style.display = 'block';
+            resultsContainer.style.display = 'none';
+
+            // Set preview image
+            const url = URL.createObjectURL(file);
+            previewImage.src = url;
+
+            // Start Animation
+            scannerLine.style.display = 'block';
+            scannerLine.style.animation = 'scan 2s linear infinite';
+            analyzingText.style.display = 'block';
+
+            // Simulate CNN Processing time
+            setTimeout(() => {
+                showResults();
+            }, 3500);
+        }
+
+        function showResults() {
+            // Stop scanning
+            scannerLine.style.display = 'none';
+            scannerLine.style.animation = 'none';
+            analyzingText.style.display = 'none';
+
+            // Randomly select a result for demo purposes (simulate CNN classification)
+            const result = mockDiseases[Math.floor(Math.random() * mockDiseases.length)];
+
+            // Populate Results
+            document.getElementById('disease-name').innerText = result.name;
+            document.getElementById('disease-name').style.color = result.badgeColor;
+            
+            document.getElementById('pathogen-type').innerText = result.pathogen;
+            
+            const badge = document.getElementById('severity-badge');
+            badge.innerText = `Severity: ${result.severity}`;
+            badge.style.background = result.badgeColor;
+            badge.style.color = "white";
+
+            document.getElementById('confidence-score').innerText = result.confidence;
+
+            document.getElementById('treatment-text').innerText = result.treatment;
+            document.getElementById('treatment-card').className = `info-card ${result.severityClass}`;
+            
+            const actionCard = document.getElementById('action-card');
+            actionCard.className = `info-card ${result.severityClass === 'severity-high' ? 'severity-medium' : 'severity-low'}`;
+
+            const actionList = document.getElementById('action-list');
+            actionList.innerHTML = '';
+            result.actions.forEach(action => {
+                const li = document.createElement('li');
+                li.innerText = action;
+                actionList.appendChild(li);
+            });
+
+            // Show Results
+            resultsContainer.style.display = 'block';
+            resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            
+            // Re-initialize sparkles if needed
+            if(window.particles && typeof initParticles === 'function') {
+                initParticles();
+            }
+        }
+
+        function resetDoctor() {
+            // Reset state
+            uploadZone.style.display = 'block';
+            scannerContainer.style.display = 'none';
+            resultsContainer.style.display = 'none';
+            fileInput.value = '';
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
