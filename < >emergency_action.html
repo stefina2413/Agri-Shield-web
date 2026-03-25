@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGRI-SHIELD | Emergency Action Generator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <script>
+        if (!sessionStorage.getItem('agri_auth')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <img id="entrance-logo-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%2327ae60'><path d='M50 5C25 5 5 25 5 50s20 45 45 45 45-20 45-45S75 5 50 5zm0 15c16.5 0 30 13.5 30 30S66.5 80 50 80 20 66.5 20 50 33.5 20 50 20zm-5 15v10H35v10h10v10h10V50h10V40H55V30h-10z'/></svg>" alt="Agri-Shield Logo">
+                <h2 data-i18n="title">AGRI-SHIELD</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="home.html" data-i18n="nav_home"><i class="fa-solid fa-house"></i> <span>Home</span></a>
+                <a href="plant_doctor.html" data-i18n="plant_doctor"><i class="fa-solid fa-notes-medical"></i> <span>Plant Doctor AI</span></a>
+                <a href="nutrient_doctor.html" data-i18n="nutrient_doctor"><i class="fa-solid fa-flask"></i> <span>Smart Nutrient</span></a>
+                <a href="crop_health.html" data-i18n="health_dash"><i class="fa-solid fa-chart-line"></i> <span>Crop Health</span></a>
+                <a href="emergency_action.html" data-i18n="emergency_action" class="active"><i class="fa-solid fa-truck-medical"></i> <span>Emergency Action</span></a>
+                <a href="drone_news.html" data-i18n="drone_news"><i class="fa-solid fa-satellite-dish"></i> <span>Drone + News</span></a>
+                <a href="developer.html" data-i18n="nav_developer"><i class="fa-solid fa-code"></i> <span>Developer</span></a>
+            </nav>
+            <div class="lang-selector-sidebar">
+                <select id="lang-selector">
+                    <option value="en">English</option>
+                    <option value="ta">தமிழ்</option>
+                    <option value="hi">हिन्दी</option>
+                    <option value="te">తెలుగు</option>
+                    <option value="ml">മലയാളം</option>
+                </select>
+            </div>
+        </aside>
+
+        <div class="main-wrapper">
+            <main style="padding: 40px; display: flex; justify-content: center; align-items: flex-start;">
+                <div class="dash-card" id="emergency" style="width: 100%; max-width: 800px; min-width: unset; scroll-snap-align: none; flex: none;">
+                    <div class="card-icon"><i class="fa-solid fa-truck-medical"></i></div>
+                    <h3 data-i18n="emergency_action">Emergency Action</h3>
+                    <p>Instant step-by-step solution generator.</p>
+                    <input type="text" id="emergency-pest" class="input-control mt-10" placeholder="Pest Type (e.g., Aphids)">
+                    <input type="text" id="emergency-crop" class="input-control mt-10" placeholder="Crop (e.g., Wheat)">
+                    <button class="btn-primary mt-10" onclick="generateEmergencyAction()">Generate Action</button>
+                    <div id="emergency-result" style="display:none; margin-top: 15px; padding: 15px; background: #ffeae6; border-left: 4px solid #e74c3c; border-radius: 8px; text-align: left;">
+                        <h4 style="color: #c0392b; margin-bottom: 5px; font-size: 1rem;"><i class="fa-solid fa-triangle-exclamation"></i> Immediate Action Plan:</h4>
+                        <ul id="emergency-steps" style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: #333; line-height: 1.4;">
+                        </ul>
+                    </div>
+                </div>
+            </main>
+            <footer class="custom-footer" style="margin-top: auto;">
+                <canvas id="footer-sparkles" style="z-index: -1;"></canvas>
+                <div class="footer-nav">
+                    <a href="home.html" data-i18n="nav_home">Home</a><span>|</span>
+                    <a href="developer.html" data-i18n="nav_developer">Developer</a><span>|</span>
+                    <a href="#" data-i18n="nav_feedback">Feedback</a>
+                </div>
+                <div class="footer-dev-text">
+                    Developed by SHANTHINI.R , STEFINA.A, TURANYA.M CREATED BY KVCET
+                </div>
+            </footer>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script src="sparkle.js"></script>
+    <script>
+        const savedLogo = localStorage.getItem('entrance_logo');
+        if (savedLogo) {
+            document.getElementById('entrance-logo-img').src = savedLogo;
+        }
+
+        function generateEmergencyAction() {
+            const pestInput = document.getElementById('emergency-pest').value.trim();
+            const cropInput = document.getElementById('emergency-crop').value.trim();
+            const pest = pestInput ? `<strong>${pestInput}</strong>` : 'the specified threat';
+            const crop = cropInput ? `<strong>${cropInput}</strong>` : 'your crop';
+
+            const resultDiv = document.getElementById('emergency-result');
+            const stepsList = document.getElementById('emergency-steps');
+            
+            stepsList.innerHTML = `
+                <li><strong>Quarantine:</strong> Isolate the affected area of ${crop} to prevent spread to healthy plants.</li>
+                <li><strong>Treatment:</strong> Apply emergency counter-measures / broad-spectrum treatment specifically targeted against ${pest}.</li>
+                <li><strong>Monitor:</strong> Re-assess crop health every 12 hours. Alert neighboring farms if it is a major spreading threat.</li>
+            `;
+            resultDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
