@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGRI-SHIELD | Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <canvas id="bg-sparkles"></canvas>
+
+    <div class="top-bar">
+        <div class="logo-container">
+            <img id="entrance-logo-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%2327ae60'><path d='M50 5C25 5 5 25 5 50s20 45 45 45 45-20 45-45S75 5 50 5zm0 15c16.5 0 30 13.5 30 30S66.5 80 50 80 20 66.5 20 50 33.5 20 50 20zm-5 15v10H35v10h10v10h10V50h10V40H55V30h-10z'/></svg>" alt="Agri-Shield Logo">
+        </div>
+        <div class="lang-selector">
+            <select id="lang-selector">
+                <option value="en">English</option>
+                <option value="ta">தமிழ்</option>
+                <option value="hi">हिन्दी</option>
+                <option value="te">తెలుగు</option>
+                <option value="ml">മലയാളം</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="entrance-container">
+        <div class="book-card">
+            <div style="font-size: 3rem; color: var(--dark-green); margin-bottom: 10px;">
+                <i class="fa-solid fa-seedling"></i>
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            <h1 class="title-animated" data-i18n="title">AGRI-SHIELD</h1>
+            <p style="margin-bottom: 25px; color: #555;" data-i18n="project_by">A Project by Trinity Force</p>
+            
+            <form id="loginForm">
+                <div class="input-group">
+                    <label data-i18n="username"><i class="fa-solid fa-user"></i> Username</label>
+                    <input type="text" id="username" class="input-control" data-i18n="username" placeholder="Username" required>
+                </div>
+                <div class="input-group">
+                    <label data-i18n="password"><i class="fa-solid fa-lock"></i> Password</label>
+                    <input type="password" id="password" class="input-control" data-i18n="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn-primary" data-i18n="login">Secure Login <i class="fa-solid fa-arrow-right-to-bracket"></i></button>
+                <div id="login-error">Invalid Credentials. Try again.</div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="custom-footer">
+        <canvas id="footer-sparkles" style="z-index: -1;"></canvas>
+        <div class="footer-nav">
+            <a href="home.html" data-i18n="nav_home">Home</a>
+            <span>|</span>
+            <a href="developer.html" data-i18n="nav_developer">Developer</a>
+            <span>|</span>
+            <a href="#" data-i18n="nav_feedback">Feedback</a>
+        </div>
+        <div class="footer-dev-text">
+            Developed by SHANTHINI.R , STEFINA.A, TURANYA.M CREATED BY KVCET
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="sparkle.js"></script>
+    <script>
+        // Check local storage for entrance logo
+        const savedLogo = localStorage.getItem('entrance_logo');
+        if (savedLogo) {
+            document.getElementById('entrance-logo-img').src = savedLogo;
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const uname = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            if (uname === 'trinityforce' && pass === 'nanoshield123') {
+                sessionStorage.setItem('agri_auth', 'true');
+                window.location.href = 'home.html';
+            } else {
+                const err = document.getElementById('login-error');
+                err.style.display = 'block';
+                setTimeout(() => err.style.display = 'none', 3000);
+            }
+        });
+    </script>
+</body>
+</html>
