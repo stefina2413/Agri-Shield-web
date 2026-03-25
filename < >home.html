@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGRI-SHIELD | Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <script>
+        if (!sessionStorage.getItem('agri_auth')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+
+    <!-- Top Navigation -->
+    <nav class="main-nav">
+        <div class="nav-brand">
+            <img id="entrance-logo-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%2327ae60'><path d='M50 5C25 5 5 25 5 50s20 45 45 45 45-20 45-45S75 5 50 5zm0 15c16.5 0 30 13.5 30 30S66.5 80 50 80 20 66.5 20 50 33.5 20 50 20zm-5 15v10H35v10h10v10h10V50h10V40H55V30h-10z'/></svg>" alt="Agri-Shield Logo">
+            <h2 data-i18n="title">AGRI-SHIELD</h2>
+        </div>
+        <div class="nav-links">
+            <a href="home.html" class="active" data-i18n="nav_home">Home</a>
+            <div class="dropdown">
+                <button class="dropbtn">Modules <i class="fa-solid fa-caret-down"></i></button>
+                <div class="dropdown-content">
+                    <a href="plant_doctor.html" data-i18n="plant_doctor">Plant Doctor AI</a>
+                    <a href="nutrient_doctor.html" data-i18n="nutrient_doctor">Smart Nutrient Doctor</a>
+                    <a href="home.html#crop-health" data-i18n="health_dash" onclick="if(window.location.pathname.endsWith('home.html') || window.location.pathname === '/' || window.location.pathname === ''){ setTimeout(()=>window.scrollBy(-1000,0), 10); }">Crop Health Intelligence</a>
+                    <a href="home.html#emergency" data-i18n="emergency_action" onclick="if(window.location.pathname.endsWith('home.html') || window.location.pathname === '/' || window.location.pathname === ''){ setTimeout(()=>window.scrollBy(-1000,0), 10); }">Emergency Action</a>
+                    <a href="home.html#drone-news" data-i18n="drone_news" onclick="if(window.location.pathname.endsWith('home.html') || window.location.pathname === '/' || window.location.pathname === ''){ setTimeout(()=>window.scrollBy(-1000,0), 10); }">Drone + News</a>
+                </div>
+            </div>
+            <a href="developer.html" data-i18n="nav_developer">Developer</a>
+        </div>
+        <div class="lang-selector">
+            <select id="lang-selector">
+                <option value="en">English</option>
+                <option value="ta">தமிழ்</option>
+                <option value="hi">हिन्दी</option>
+                <option value="te">తెలుగు</option>
+                <option value="ml">മലയാളം</option>
+            </select>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <main class="dashboard-container">
+        <!-- 1. Plant Doctor AI -->
+        <div class="dash-card">
+            <div class="card-icon"><i class="fa-solid fa-leaf"></i></div>
+            <h3 data-i18n="plant_doctor">Plant Doctor AI</h3>
+            <p>Go to the dedicated AI module for crop inspection and diagnosis.</p>
+            <div style="text-align: center; margin-top: 20px;">
+                <img src="https://cdn-icons-png.flaticon.com/512/3208/3208390.png" alt="Brain AI" style="width: 80px; opacity: 0.8; margin-bottom: 20px;">
+            </div>
+            <button class="btn-primary mt-10" onclick="window.location.href='plant_doctor.html'">Open Plant Doctor AI</button>
+        </div>
+
+        <!-- 2. Smart Nutrient Doctor -->
+        <div class="dash-card">
+            <div class="card-icon"><i class="fa-solid fa-flask"></i></div>
+            <h3 data-i18n="nutrient_doctor">Smart Nutrient Doctor</h3>
+            <p>Diagnoses crops and prescribes fertilizers based on precise data.</p>
+            <div style="text-align: center; margin-top: 20px;">
+                <img src="https://cdn-icons-png.flaticon.com/512/3063/3063126.png" alt="Fertilizer AI" style="width: 80px; opacity: 0.8; margin-bottom: 20px;">
+            </div>
+            <button class="btn-primary mt-10" onclick="window.location.href='nutrient_doctor.html'">Open Nutrient Doctor</button>
+        </div>
+
+        <!-- 3. Crop Health Intelligence Dashboard -->
+        <div class="dash-card" id="crop-health">
+            <div class="card-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <h3 data-i18n="health_dash">Crop Health Intelligence</h3>
+            <p>Drone feed data analytics.</p>
+            <div class="chart-mockup">
+                <div class="bar" style="height: 60%; transition: 0.3s;" id="chi-bar-1"></div>
+                <div class="bar" style="height: 80%; transition: 0.3s;" id="chi-bar-2"></div>
+                <div class="bar" style="height: 40%; background: #e74c3c; transition: 0.3s;" id="chi-bar-3"></div>
+                <div class="bar" style="height: 90%; transition: 0.3s;" id="chi-bar-4"></div>
+            </div>
+            <p id="chi-score" style="text-align:center; font-weight:bold; color:var(--dark-green)">Overall Health Score: 85%</p>
+            <p id="chi-status" style="text-align:center; color:#e74c3c">Stress Detected in Sector 3</p>
+            <button class="btn-primary mt-10" onclick="scanCropHealth()">Run AI Scan</button>
+        </div>
+
+        <!-- 4. Emergency Action Generator -->
+        <div class="dash-card" id="emergency">
+            <div class="card-icon"><i class="fa-solid fa-truck-medical"></i></div>
+            <h3 data-i18n="emergency_action">Emergency Action</h3>
+            <p>Instant step-by-step solution generator.</p>
+            <input type="text" id="emergency-pest" class="input-control mt-10" placeholder="Pest Type (e.g., Aphids)">
+            <input type="text" id="emergency-crop" class="input-control mt-10" placeholder="Crop (e.g., Wheat)">
+            <button class="btn-primary mt-10" onclick="generateEmergencyAction()">Generate Action</button>
+            <div id="emergency-result" style="display:none; margin-top: 15px; padding: 15px; background: #ffeae6; border-left: 4px solid #e74c3c; border-radius: 8px; text-align: left;">
+                <h4 style="color: #c0392b; margin-bottom: 5px; font-size: 1rem;"><i class="fa-solid fa-triangle-exclamation"></i> Immediate Action Plan:</h4>
+                <ul id="emergency-steps" style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: #333; line-height: 1.4;">
+                </ul>
+            </div>
+        </div>
+
+        <!-- 5. Drone + News Integration -->
+        <div class="dash-card" id="drone-news">
+            <div class="card-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+            <h3 data-i18n="drone_news">Drone + News</h3>
+            <p>Real-time data meets global news.</p>
+            <div class="news-list mt-10" id="drone-news-list">
+                <div class="news-item">
+                    <h4>Locust Swarm Alert in Neighboring District</h4>
+                    <p>Source: AgriNews &bull; Suggested Action: Pre-spray crops.</p>
+                </div>
+            </div>
+            <button class="btn-primary mt-10" onclick="fetchLatestNews()">Refresh Alerts</button>
+        </div>
+
+        <!-- 6. Yearly Crop Calendar -->
+        <div class="dash-card span-full">
+            <div class="card-icon"><i class="fa-regular fa-calendar-days"></i></div>
+            <h3 data-i18n="calendar">Yearly Crop Calendar</h3>
+            <div style="overflow-x:auto;" class="mt-10">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Crop</th>
+                            <th>Fertilizer</th>
+                            <th>Rate (₹)</th>
+                            <th>Pesticide</th>
+                            <th>Total Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>10-Jan</td><td>Wheat</td><td>Urea Base Dose</td><td>₹250</td><td>None</td><td>₹250</td></tr>
+                        <tr><td>25-Jan</td><td>Wheat</td><td>Zinc Supplement</td><td>₹100</td><td>Mancozeb (Fungicide)</td><td>₹450</td></tr>
+                        <tr><td>14-Feb</td><td>Wheat</td><td>Potash Top Dressing</td><td>₹300</td><td>Weedicide (2,4-D)</td><td>₹650</td></tr>
+                        <tr><td>05-Mar</td><td>Wheat</td><td>No Fertilizer</td><td>₹0</td><td>Aphid Control Spray</td><td>₹200</td></tr>
+                        <tr><td>20-Mar</td><td>Wheat (Harvest Prep)</td><td>None</td><td>₹0</td><td>None</td><td>₹0</td></tr>
+                        
+                        <tr><td>15-May</td><td>Cotton</td><td>FYM (Compost)</td><td>₹500</td><td>Pre-emergent weedicide</td><td>₹800</td></tr>
+                        <tr><td>01-Jun</td><td>Cotton</td><td>DAP Base Dose</td><td>₹800</td><td>None</td><td>₹800</td></tr>
+                        <tr><td>25-Jun</td><td>Cotton</td><td>Urea 1st Split</td><td>₹300</td><td>Neem Oil Spray</td><td>₹450</td></tr>
+                        <tr><td>15-Jul</td><td>Cotton</td><td>Urea 2nd Split</td><td>₹300</td><td>Bollworm Prevention</td><td>₹600</td></tr>
+                        <tr><td>10-Aug</td><td>Cotton</td><td>Potassium Nitrate (Spray)</td><td>₹200</td><td>Whitefly Control</td><td>₹500</td></tr>
+                        
+                        <tr><td>05-Sep</td><td>Tomato</td><td>Organic Manure</td><td>₹400</td><td>Seed Treatment</td><td>₹500</td></tr>
+                        <tr><td>20-Sep</td><td>Tomato</td><td>NPK 19:19:19</td><td>₹350</td><td>None</td><td>₹350</td></tr>
+                        <tr><td>10-Oct</td><td>Tomato</td><td>Calcium Nitrate</td><td>₹250</td><td>Blight Fungicide</td><td>₹450</td></tr>
+                        <tr><td>25-Oct</td><td>Tomato</td><td>Boron Micro-nutrient</td><td>₹150</td><td>Fruit Borer Spray</td><td>₹400</td></tr>
+                        <tr><td>15-Nov</td><td>Tomato</td><td>Potash Booster</td><td>₹300</td><td>Mite Control</td><td>₹450</td></tr>
+
+                        <tr><td>01-Dec</td><td>Corn</td><td>Urea Base</td><td>₹250</td><td>Stem Borer Granules</td><td>₹550</td></tr>
+                        <tr><td>20-Dec</td><td>Corn</td><td>Zinc Sulphate</td><td>₹150</td><td>None</td><td>₹150</td></tr>
+                        <tr><td>10-Jan</td><td>Corn</td><td>Urea Top Dress</td><td>₹250</td><td>Fall Armyworm Spray</td><td>₹600</td></tr>
+
+                        <tr>
+                            <td colspan="5" style="text-align:right"><strong>Annual Estimated Cost (per acre):</strong></td>
+                            <td><strong>₹8,100</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="reference-rates mt-10">
+                <p><strong>Reference Rates (2026):</strong> Urea: ~₹240/50kg | DAP: ~₹1350/50kg | NPK: ~₹1800/50kg</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Floating Notes Button -->
+    <div class="floating-notes-btn" id="open-notes" title="Notes Portal">
+        <i class="fa-solid fa-file-pen"></i>
+    </div>
+
+    <!-- Notes Modal -->
+    <div class="modal-backdrop" id="notes-backdrop"></div>
+    <div class="notes-modal" id="notes-modal">
+        <h3 data-i18n="notes">Notes Portal</h3>
+        <p data-i18n="notes_desc" style="margin-bottom:10px; color:#555;">Add notes and upload files here.</p>
+        <textarea id="portal-note" placeholder="Write your notes..."></textarea>
+        
+        <input type="file" id="portal-file" class="input-control" accept="image/*, .pdf, .doc">
+        <div id="portal-preview" class="file-preview"></div>
+        
+        <div class="action-btns">
+            <button class="btn-sm btn-save" onclick="savePortal()" data-i18n="save">Save</button>
+            <button class="btn-sm btn-delete" onclick="clearPortal()" data-i18n="delete">Delete</button>
+            <button class="btn-sm btn-cancel" onclick="closePortal()" data-i18n="cancel">Cancel</button>
+        </div>
+    </div>
+
+    <footer class="custom-footer" style="margin-top: auto;">
+        <canvas id="footer-sparkles" style="z-index: -1;"></canvas>
+        <div class="footer-nav">
+            <a href="home.html" data-i18n="nav_home">Home</a>
+            <span>|</span>
+            <a href="developer.html" data-i18n="nav_developer">Developer</a>
+            <span>|</span>
+            <a href="#" data-i18n="nav_feedback">Feedback</a>
+        </div>
+        <div class="footer-dev-text">
+            Developed by SHANTHINI.R , STEFINA.A, TURANYA.M CREATED BY KVCET
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="sparkle.js"></script>
+    <script>
+        // Check local storage for entrance logo
+        const savedLogo = localStorage.getItem('entrance_logo');
+        if (savedLogo) {
+            document.getElementById('entrance-logo-img').src = savedLogo;
+        }
+
+        // Initialize file uploads
+        handleFileUpload('plant-photo', 'plant-preview');
+        handleFileUpload('leaf-photo', 'leaf-preview');
+        handleFileUpload('portal-file', 'portal-preview');
+
+        // Notes Portal Logic
+        const notesBtn = document.getElementById('open-notes');
+        const notesModal = document.getElementById('notes-modal');
+        const notesBackdrop = document.getElementById('notes-backdrop');
+
+        notesBtn.addEventListener('click', () => {
+            notesModal.classList.add('active');
+            notesBackdrop.classList.add('active');
+        });
+
+        notesBackdrop.addEventListener('click', closePortal);
+
+        function closePortal() {
+            notesModal.classList.remove('active');
+            notesBackdrop.classList.remove('active');
+        }
+
+        function clearPortal() {
+            document.getElementById('portal-note').value = '';
+            document.getElementById('portal-file').value = '';
+            document.getElementById('portal-preview').innerHTML = '';
+        }
+
+        function savePortal() {
+            alert('Note saved successfully!');
+            closePortal();
+        }
+
+        function generateEmergencyAction() {
+            const pestInput = document.getElementById('emergency-pest').value.trim();
+            const cropInput = document.getElementById('emergency-crop').value.trim();
+            const pest = pestInput ? `<strong>${pestInput}</strong>` : 'the specified threat';
+            const crop = cropInput ? `<strong>${cropInput}</strong>` : 'your crop';
+
+            const resultDiv = document.getElementById('emergency-result');
+            const stepsList = document.getElementById('emergency-steps');
+            
+            stepsList.innerHTML = `
+                <li><strong>Quarantine:</strong> Isolate the affected area of ${crop} to prevent spread to healthy plants.</li>
+                <li><strong>Treatment:</strong> Apply emergency counter-measures / broad-spectrum treatment specifically targeted against ${pest}.</li>
+                <li><strong>Monitor:</strong> Re-assess crop health every 12 hours. Alert neighboring farms if it is a major spreading threat.</li>
+            `;
+            resultDiv.style.display = 'block';
+        }
+
+        function scanCropHealth() {
+            const scoreLabel = document.getElementById('chi-score');
+            const statusLabel = document.getElementById('chi-status');
+            const bar3 = document.getElementById('chi-bar-3');
+            const bar1 = document.getElementById('chi-bar-1');
+            const bar2 = document.getElementById('chi-bar-2');
+            const bar4 = document.getElementById('chi-bar-4');
+            
+            statusLabel.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> AI Drone Scanning...";
+            statusLabel.style.color = "#f39c12";
+
+            setTimeout(() => {
+                bar1.style.height = "85%";
+                bar2.style.height = "95%";
+                bar3.style.height = "88%";
+                bar3.style.background = "var(--primary-green)";
+                bar4.style.height = "92%";
+                scoreLabel.innerText = "Overall Health Score: 94%";
+                statusLabel.innerHTML = "<i class='fa-solid fa-check-circle'></i> Stress resolved. All sectors optimal.";
+                statusLabel.style.color = "var(--primary-green)";
+            }, 300);
+        }
+
+        function fetchLatestNews() {
+            const newsList = document.getElementById('drone-news-list');
+            const newFeeds = [
+                { title: "Heavy Rainfall Expected in 48 hours", src: "AgriWeather", action: "Clear field drainage channels." },
+                { title: "Stem Borer outbreak in nearby Maize fields", src: "PestAlert AI", action: "Apply prophylactic neem spray." },
+                { title: "Subsidized DAP available at local cooperative", src: "Govt Portal", action: "Purchase stock for next season." },
+                { title: "Heatwave incoming, temperature to cross 40°C", src: "AgriNews", action: "Increase irrigation frequency." }
+            ];
+            const pick = newFeeds[Math.floor(Math.random() * newFeeds.length)];
+            const newItem = document.createElement('div');
+            newItem.className = 'news-item';
+            newItem.innerHTML = `<h4>${pick.title} <span style="color:var(--primary-green);font-size:0.8rem;">(New)</span></h4><p>Source: ${pick.src} &bull; Suggested Action: ${pick.action}</p>`;
+            newsList.insertBefore(newItem, newsList.firstChild);
+        }
+    </script>
+</body>
+</html>
