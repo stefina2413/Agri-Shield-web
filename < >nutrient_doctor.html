@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Nutrient Doctor | AGRI-SHIELD</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .nd-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        
+        .ai-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .ai-header h1 {
+            color: var(--dark-green);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .ai-header p {
+            color: #555;
+            font-size: 1.1rem;
+        }
+
+        .form-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark-green);
+            font-weight: 600;
+        }
+        
+        .label-with-action {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: white;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-green);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .sensor-data-box {
+            background: #f1f8e9;
+            border-left: 4px solid var(--primary-green);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .sensor-data-box p {
+            margin: 5px 0;
+            font-size: 0.95rem;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .sensor-value {
+            font-weight: 700;
+            color: var(--dark-green);
+        }
+
+        .btn-analyze {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, var(--dark-green), var(--primary-green));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-analyze:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.4);
+        }
+
+        /* Processing State */
+        .processing-container {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: var(--glass-bg);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid var(--primary-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .processing-text {
+            font-size: 1.2rem;
+            color: var(--dark-green);
+            font-weight: 600;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.6; }
+            to { opacity: 1; }
+        }
+
+        /* Results Area */
+        .results-container {
+            display: none;
+            margin-top: 30px;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .deficiency-title {
+            font-size: 2rem;
+            color: #d35400;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+            background: #e74c3c;
+            margin-bottom: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .info-card {
+            background: #f9fbfb;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid var(--primary-green);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .info-card h4 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-card p, .info-card ul {
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .info-card ul {
+            padding-left: 20px;
+            margin-top: 8px;
+        }
+
+        .info-card li {
+            margin-bottom: 8px;
+        }
+
+        .card-primary { border-left-color: #27ae60; }
+        .card-secondary { border-left-color: #f39c12; }
+        .card-tertiary { border-left-color: #8e44ad; }
+
+        .btn-reset {
+            display: block;
+            margin: 30px auto 0;
+            padding: 12px 30px;
+            background: var(--dark-green);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-reset:hover {
+            background: #1e8449;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-autofill {
+            background: #ecf0f1;
+            border: 1px solid #bdc3c7;
+            padding: 4px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: #555;
+            transition: 0.2s;
+            font-weight: 600;
+        }
+
+        .btn-autofill:hover {
+            background: #dcdde1;
+            color: #222;
+        }
+        
+        .upload-small {
+            border: 2px dashed #bdc3c7;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        .upload-small:hover {
+            border-color: var(--primary-green);
+            background: #fafffb;
+        }
+
+    </style>
+</head>
+<body>
+    <script>
+        if (!sessionStorage.getItem('agri_auth')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+
+    <!-- Top Navigation -->
+    <nav class="main-nav">
+        <div class="nav-brand">
+            <img id="entrance-logo-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' fill='%2327ae60'><path d='M50 5C25 5 5 25 5 50s20 45 45 45 45-20 45-45S75 5 50 5zm0 15c16.5 0 30 13.5 30 30S66.5 80 50 80 20 66.5 20 50 33.5 20 50 20zm-5 15v10H35v10h10v10h10V50h10V40H55V30h-10z'/></svg>" alt="Agri-Shield Logo">
+            <h2 data-i18n="title">AGRI-SHIELD</h2>
+        </div>
+        <div class="nav-links">
+            <a href="home.html" data-i18n="nav_home">Home</a>
+            <div class="dropdown">
+                <button class="dropbtn">Modules <i class="fa-solid fa-caret-down"></i></button>
+                <div class="dropdown-content">
+                    <a href="plant_doctor.html" data-i18n="plant_doctor">Plant Doctor AI</a>
+                    <a href="nutrient_doctor.html" data-i18n="nutrient_doctor">Smart Nutrient Doctor</a>
+                    <a href="home.html#crop-health" data-i18n="health_dash" onclick="if(window.location.pathname.endsWith('home.html') || window.location.pathname === '/' || window.location.pathname === ''){ setTimeout(()=>window.scrollBy(-1000,0), 10); }">Crop Health Intelligence</a>
+                    <a href="home.html#emergency" data-i18n="emergency_action" onclick="if(window.location.pathname.endsWith('home.html') || window.location.pathname === '/' || window.location.pathname === ''){ setTimeout(()=>window.scrollBy(-1000,0), 10); }">Emergency Action</a>
+                    <a href="home.html#drone-news" data-i18n="drone_news" onclick="if(window.location.pathname.endsWith('home.html') || window.location.pathname === '/' || window.location.pathname === ''){ setTimeout(()=>window.scrollBy(-1000,0), 10); }">Drone + News</a>
+                </div>
+            </div>
+            <a href="developer.html" data-i18n="nav_developer">Developer</a>
+        </div>
+        <div class="lang-selector">
+            <select id="lang-selector">
+                <option value="en">English</option>
+                <option value="ta">தமிழ்</option>
+                <option value="hi">हिन्दी</option>
+                <option value="te">తెలుగు</option>
+                <option value="ml">മലയാളം</option>
+            </select>
+        </div>
+    </nav>
+
+    <!-- Smart Nutrient Doctor Context -->
+    <div class="nd-container">
+        <div class="ai-header">
+            <h1>Smart Nutrient Doctor</h1>
+            <p>Optimize nutrients based on precision agriculture and IoT sensor data.</p>
+        </div>
+
+        <!-- Form Panel -->
+        <div class="form-panel" id="form-panel">
+            <div class="form-grid">
+                
+                <div class="form-group full-width">
+                    <div class="label-with-action">
+                        <label>Soil Test Report (Optional)</label>
+                        <button type="button" class="btn-autofill" onclick="autoFillTestData()"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-fill Demo Data</button>
+                    </div>
+                    <div class="upload-small" id="upload-zone" onclick="document.getElementById('soil-report').click()">
+                        <i class="fa-solid fa-file-arrow-up" id="upload-icon" style="font-size: 2rem; color: #e74c3c; margin-bottom: 10px;"></i>
+                        <p id="upload-text" style="margin:0; color:#555;">Upload Soil Test Report / Image (.pdf, .csv, .jpg)</p>
+                        <input type="file" id="soil-report" style="display: none;" accept=".pdf,.csv,image/*">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Crop Type</label>
+                    <select id="crop-type" class="form-control">
+                        <option value="">Select Crop...</option>
+                        <option value="wheat">Wheat</option>
+                        <option value="rice">Rice (Paddy)</option>
+                        <option value="corn">Corn (Maize)</option>
+                        <option value="cotton">Cotton</option>
+                        <option value="sugarcane">Sugarcane</option>
+                        <option value="soybean">Soybean</option>
+                        <option value="tomato">Tomato</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Growth Stage</label>
+                    <select id="growth-stage" class="form-control">
+                        <option value="">Select Stage...</option>
+                        <option value="seedling">Seedling / Early Vegetative</option>
+                        <option value="vegetative">Vegetative Growth</option>
+                        <option value="flowering">Flowering</option>
+                        <option value="fruiting">Fruiting / Grain Filling</option>
+                        <option value="maturity">Maturity / Pre-harvest</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Nitrogen (N) Content (kg/ha)</label>
+                    <input type="number" id="n-val" class="form-control" placeholder="e.g. 120">
+                </div>
+
+                <div class="form-group">
+                    <label>Soil pH Level</label>
+                    <input type="number" step="0.1" id="ph-val" class="form-control" placeholder="e.g. 6.5">
+                </div>
+                
+                <div class="form-group">
+                    <label>Phosphorous (P) Content (kg/ha)</label>
+                    <input type="number" id="p-val" class="form-control" placeholder="e.g. 45">
+                </div>
+
+                <div class="form-group">
+                    <label>Potassium (K) Content (kg/ha)</label>
+                    <input type="number" id="k-val" class="form-control" placeholder="e.g. 180">
+                </div>
+
+                <div class="form-group full-width">
+                    <div class="label-with-action">
+                        <label><i class="fa-solid fa-satellite-dish" style="color:var(--dark-green);"></i> Live IoT Sensor Data</label>
+                        <span style="font-size: 0.85rem; color: #27ae60;"><i class="fa-solid fa-circle-dot" style="animation: pulse 1.5s infinite;"></i> Connected</span>
+                    </div>
+                    <div class="sensor-data-box">
+                        <p>Soil Moisture: <span class="sensor-value" id="sensor-moisture">42% (Optimal)</span></p>
+                        <p>Electrical Conductivity (EC): <span class="sensor-value" id="sensor-ec">1.2 dS/m</span></p>
+                        <p>Soil Temperature: <span class="sensor-value" id="sensor-temp">24°C</span></p>
+                        <p style="font-size: 0.8rem; color: #7f8c8d; margin-top: 10px;"><i class="fa-solid fa-rotate-right"></i> Last synced: Just now</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-analyze" onclick="startNutrientAnalysis()"><i class="fa-solid fa-microchip"></i> Analyze Nutrients & Generate Plan</button>
+        </div>
+
+        <!-- Processing State -->
+        <div class="processing-container" id="processing-container">
+            <div class="loader"></div>
+            <p class="processing-text" id="processing-text">Analyzing NPK models & sensor data...</p>
+        </div>
+
+        <!-- Results Container -->
+        <div class="results-container" id="results-container">
+            <div class="result-header">
+                <div>
+                    <span class="badge" id="deficiency-badge">High Priority</span>
+                    <h2 class="deficiency-title" id="deficiency-title">Nitrogen Deficiency Detected</h2>
+                    <p style="color: #666; margin-top: 5px; font-size: 1.05rem;"><i class="fa-solid fa-chart-pie" style="color:var(--dark-green)"></i> Algorithm: <strong id="algorithm-type">Linear Optimization + ML Regression</strong></p>
+                </div>
+                <div style="text-align: right;">
+                    <p style="margin:0; font-weight: 600; color: #555;">Crop Analyzed</p>
+                    <h3 style="margin: 5px 0 0 0; color: var(--dark-green);" id="result-crop">Wheat (Vegetative)</h3>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <!-- Fertilizer Prescription -->
+                <div class="info-card card-primary" id="fertilizer-card">
+                    <h4><i class="fa-solid fa-flask" style="color: #27ae60;"></i> Fertilizer Prescription</h4>
+                    <p id="fertilizer-text">Apply <strong>Urea</strong> (split doses) to address Nitrogen deficiency without overwhelming the electrical conductivity.</p>
+                    <ul id="dosage-list">
+                        <li><strong>Exact Dosage:</strong> 45 kg/acre</li>
+                        <li><strong>Type:</strong> Chemical Nitrogen</li>
+                    </ul>
+                </div>
+
+                <!-- Schedule & App Method -->
+                <div class="info-card card-secondary" id="schedule-card">
+                    <h4><i class="fa-regular fa-calendar-check" style="color: #f39c12;"></i> Application Schedule</h4>
+                    <ul id="schedule-list">
+                        <li><strong>Dose 1 (50%):</strong> Immediate application (Within 2 days)</li>
+                        <li><strong>Dose 2 (50%):</strong> After 21 days from Dose 1</li>
+                        <li><strong>Method:</strong> Precision fertigation via drip (recommended to minimize loss)</li>
+                    </ul>
+                </div>
+
+                <!-- Advanced Interventions -->
+                <div class="info-card card-tertiary" id="advanced-card">
+                    <h4><i class="fa-solid fa-scale-balanced" style="color: #8e44ad;"></i> Advanced Interventions</h4>
+                    <ul id="advanced-list">
+                        <li><strong>pH Balancing:</strong> Soil pH is 8.2 (Alkaline). Add Gypsum to lower pH and improve nutrient absorption.</li>
+                        <li><strong>Micro-nutrients:</strong> Add Zinc Sulphate (10 kg/acre) as trace deficiency modeled.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px; flex-wrap: wrap;">
+                <button class="btn-reset" style="margin: 0;" onclick="resetForm()">Start New Analysis</button>
+                <button class="btn-reset" style="margin: 0; background: #2980b9;" onclick="window.print()"><i class="fa-solid fa-file-pdf"></i> Download PDF Report</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="custom-footer" style="margin-top: auto;">
+        <canvas id="footer-sparkles" style="z-index: -1;"></canvas>
+        <div class="footer-nav">
+            <a href="home.html" data-i18n="nav_home">Home</a>
+            <span>|</span>
+            <a href="developer.html" data-i18n="nav_developer">Developer</a>
+            <span>|</span>
+            <a href="#" data-i18n="nav_feedback">Feedback</a>
+        </div>
+        <div class="footer-dev-text">
+            Developed by SHANTHINI.R , STEFINA.A, TURANYA.M CREATED BY KVCET
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="sparkle.js"></script>
+    <script>
+        // Check for entrance logo
+        const savedLogo = localStorage.getItem('entrance_logo');
+        if (savedLogo) {
+            document.getElementById('entrance-logo-img').src = savedLogo;
+        }
+
+        const formPanel = document.getElementById('form-panel');
+        const processingContainer = document.getElementById('processing-container');
+        const resultsContainer = document.getElementById('results-container');
+        const processingText = document.getElementById('processing-text');
+        
+        // Auto-fill functionality
+        function autoFillTestData() {
+            document.getElementById('crop-type').value = 'wheat';
+            document.getElementById('growth-stage').value = 'vegetative';
+            document.getElementById('n-val').value = '85'; // Low N
+            document.getElementById('p-val').value = '40';
+            document.getElementById('k-val').value = '150';
+            document.getElementById('ph-val').value = '8.2'; // High pH as per example
+            
+            // Highlight fields briefly
+            const inputs = ['crop-type', 'growth-stage', 'n-val', 'p-val', 'k-val', 'ph-val'];
+            inputs.forEach(id => {
+                const el = document.getElementById(id);
+                el.style.backgroundColor = '#e8f5e9';
+                setTimeout(() => { el.style.backgroundColor = 'white'; }, 1000);
+            });
+        }
+
+        // Handle File Uploads
+        const fileInput = document.getElementById('soil-report');
+        const uploadText = document.getElementById('upload-text');
+        const uploadIcon = document.getElementById('upload-icon');
+        const uploadZone = document.getElementById('upload-zone');
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const fileName = e.target.files[0].name;
+                uploadText.innerText = `Analyzing: ${fileName}...`;
+                uploadIcon.className = "fa-solid fa-spinner fa-spin";
+                uploadIcon.style.color = "#f39c12";
+                uploadZone.style.borderColor = "#f39c12";
+                
+                // Simulate parsing delay then autofill
+                setTimeout(() => {
+                    uploadText.innerText = `Data extracted from: ${fileName}`;
+                    uploadIcon.className = "fa-solid fa-file-circle-check";
+                    uploadIcon.style.color = "#27ae60";
+                    uploadZone.style.borderColor = "#27ae60";
+                    uploadZone.style.background = "#effaf3";
+                    autoFillTestData();
+                }, 1500);
+            }
+        });
+
+        // Mock database of recommendations
+        const mockRules = [
+            {
+                condition: (n, p, k, ph) => n < 100 && ph > 7.5,
+                title: "Nitrogen Deficiency + Alkaline Stress",
+                badge: "#e74c3c",
+                fertilizer: "Apply Urea (split doses) to address Nitrogen deficiency efficiently.",
+                dosage: "45 kg/acre",
+                fertType: "Chemical / Synthetic N",
+                schedule: [
+                    "<strong>Dose 1 (50%):</strong> Immediate application (Within 2 days)",
+                    "<strong>Dose 2 (50%):</strong> After 21 days from Dose 1",
+                    "<strong>Method:</strong> Precision fertigation via drip (recommended)"
+                ],
+                advanced: [
+                    "<strong>pH Balancing:</strong> Soil pH is Alkaline (##PH##). Add Gypsum (50 kg/acre) to balance pH and improve absorption.",
+                    "<strong>Micro-nutrients:</strong> Add Zinc Sulphate (10 kg/acre) to address trace deficiency common in alkaline soils."
+                ]
+            },
+            {
+                condition: (n, p, k, ph) => k < 120,
+                title: "Potassium (K) Deficit",
+                badge: "#f39c12",
+                fertilizer: "Apply Muriate of Potash (MOP) to strengthen stems and improve disease resistance.",
+                dosage: "30 kg/acre",
+                fertType: "Potassium Fertilizer (Organic options: Wood Ash)",
+                schedule: [
+                    "<strong>Basal Dose:</strong> Apply immediately near root zone.",
+                    "<strong>Method:</strong> Soil incorporation before irrigation."
+                ],
+                advanced: [
+                    "<strong>Sensor Insight:</strong> Current moisture (42%) is optimal for immediate application.",
+                    "<strong>Micro-nutrients:</strong> Maintain current Iron and Boron levels."
+                ]
+            },
+            {
+                condition: (n, p, k, ph) => n >= 100 && p >= 40 && k >= 120 && ph >= 6.0 && ph <= 7.5,
+                title: "Optimal Nutrient Balance",
+                badge: "#27ae60",
+                fertilizer: "No major chemical fertilizers required currently. Soil profile is well-balanced.",
+                dosage: "0 kg/acre",
+                fertType: "Organic Maintenance",
+                schedule: [
+                    "<strong>Next Review:</strong> Re-test after flowering stage.",
+                    "<strong>Method:</strong> Apply regular compost or FYM (Farm Yard Manure) to sustain soil health."
+                ],
+                advanced: [
+                    "<strong>pH Balancing:</strong> pH is optimal (##PH##).",
+                    "<strong>Precision Fertigation:</strong> Continue current drip irrigation schedule."
+                ]
+            }
+        ];
+
+        function startNutrientAnalysis() {
+            const crop = document.getElementById('crop-type').value;
+            const stage = document.getElementById('growth-stage').value;
+            const n = parseFloat(document.getElementById('n-val').value) || 0;
+            const p = parseFloat(document.getElementById('p-val').value) || 0;
+            const k = parseFloat(document.getElementById('k-val').value) || 0;
+            const ph = parseFloat(document.getElementById('ph-val').value) || 7.0;
+
+            if (!crop || !stage) {
+                alert("Please select Crop Type and Growth Stage.");
+                return;
+            }
+
+            // Show Processing
+            formPanel.style.display = 'none';
+            processingContainer.style.display = 'block';
+            resultsContainer.style.display = 'none';
+
+            // Simulate multi-step processing
+            processingText.innerText = "Analyzing NPK levels vs Crop Requirements...";
+            
+            setTimeout(() => {
+                processingText.innerText = "Running IoT Sensor correlation (Moisture & EC)...";
+            }, 100);
+
+            setTimeout(() => {
+                processingText.innerText = "Optimizing decision tree for fertilizer prescription...";
+            }, 200);
+
+            setTimeout(() => {
+                generateResults(crop, stage, n, p, k, ph);
+            }, 300);
+        }
+
+        function generateResults(crop, stage, n, p, k, ph) {
+            // Find matching rule
+            let resultRule = mockRules[2]; // Default to optimal
+            
+            if (mockRules[0].condition(n, p, k, ph)) {
+                resultRule = mockRules[0];
+            } else if (mockRules[1].condition(n, p, k, ph)) {
+                resultRule = mockRules[1];
+            }
+
+            // Hide processing
+            processingContainer.style.display = 'none';
+
+            // Populate Result
+            document.getElementById('deficiency-title').innerText = resultRule.title;
+            document.getElementById('deficiency-title').style.color = resultRule.badge;
+            
+            const badge = document.getElementById('deficiency-badge');
+            // Setting severity text
+            if(resultRule.badge === "#e74c3c") badge.innerText = "High Priority";
+            else if(resultRule.badge === "#f39c12") badge.innerText = "Moderate Priority";
+            else badge.innerText = "Optimal Status";
+            badge.style.background = resultRule.badge;
+
+            // Crop Name
+            document.getElementById('result-crop').innerText = `${crop.charAt(0).toUpperCase() + crop.slice(1)} (${stage})`;
+
+            // Fertilizer Card
+            document.getElementById('fertilizer-text').innerHTML = resultRule.fertilizer;
+            document.getElementById('dosage-list').innerHTML = `
+                <li><strong>Exact Dosage:</strong> ${resultRule.dosage}</li>
+                <li><strong>Type:</strong> ${resultRule.fertType}</li>
+            `;
+
+            // Schedule Card
+            const schedList = document.getElementById('schedule-list');
+            schedList.innerHTML = '';
+            resultRule.schedule.forEach(item => {
+                schedList.innerHTML += `<li>${item}</li>`;
+            });
+
+            // Advanced Card
+            const advList = document.getElementById('advanced-list');
+            advList.innerHTML = '';
+            resultRule.advanced.forEach(item => {
+                advList.innerHTML += `<li>${item.replace('##PH##', ph)}</li>`;
+            });
+
+
+            // Show specific border color
+            document.getElementById('fertilizer-card').style.borderLeftColor = resultRule.badge;
+
+            // Show Results
+            resultsContainer.style.display = 'block';
+            resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            
+            if(window.particles && typeof initParticles === 'function') {
+                initParticles();
+            }
+        }
+
+        function resetForm() {
+            formPanel.style.display = 'block';
+            processingContainer.style.display = 'none';
+            resultsContainer.style.display = 'none';
+            
+            // Reset upload UI
+            if (fileInput) fileInput.value = '';
+            if (uploadText) uploadText.innerText = 'Upload Soil Test Report / Image (.pdf, .csv, .jpg)';
+            if (uploadIcon) {
+                uploadIcon.className = "fa-solid fa-file-arrow-up";
+                uploadIcon.style.color = "#e74c3c";
+            }
+            if (uploadZone) {
+                uploadZone.style.borderColor = "#bdc3c7";
+                uploadZone.style.background = "transparent";
+            }
+            
+            // Reset crop selects
+            document.getElementById('crop-type').value = '';
+            document.getElementById('growth-stage').value = '';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
